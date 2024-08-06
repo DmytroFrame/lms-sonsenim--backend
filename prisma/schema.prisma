@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  email     String    @unique
+  firstName String
+  lastName  String
+  password  String
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  groups    Group[]
+}
+
+model Group {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  icon        String?
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  decks       Deck[]
+}
+
+model Deck {
+  id                  Int       @id @default(autoincrement())
+  name                String
+  isFlashcardNormal   Boolean   @default(true)
+  isFlashcardReversed Boolean   @default(false)
+  isTyping            Boolean   @default(false)
+  isRandomizedOrder   Boolean   @default(false)
+  createdAt           DateTime? @default(now())
+  updatedAt           DateTime? @updatedAt
+  groupId             Int
+  group               Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  cards               Card[]
+}
+
+model Card {
+  id                 Int       @id @default(autoincrement())
+  primaryWord        String
+  definition         String
+  example            String
+  nextRepetitionDate DateTime
+  createdAt          DateTime? @default(now())
+  updatedAt          DateTime? @updatedAt
+  deckId             Int
+  deck               Deck      @relation(fields: [deckId], references: [id], onDelete: Cascade)
+}
